@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    p {
+        margin: 0 !important;
+    }
+
+    .text-right {
+        text-align: right !important;
+    }
+
+    .text-left {
+        text-align: left !important;
+    }
+
+    .user-message {
+        border: 1px solid lightgray;
+        background: lightblue;
+        padding: 5px 10px;
+    }
+
+    .bot-message {
+        border: 1px solid lightgray;
+        padding: 5px 10px;
+    }
+</style>
+
+<div class="col-sm-12">
+    <h2> Pranil's Chatbot </h2>
+
+    <div id="chatArea" style="min-height: 300px;border: 1px solid rgb(118, 118, 118);margin-bottom: 10px;overflow-y: auto;max-height: 300px;">
+    </div>
+
+    <div style="display: flex;">
+        <input type="text" name="Message" id="txtUserMessage" class="col-sm-11" style="padding:5px 10px; margin-right:5px" />
+        <input type="hidden" name="Name" id="txtUserName" />
+        <button class="btn btn-primary col-sm-1" onclick="AttachUserText()">Send</button>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript">
+        const scrollToLastItem = () => {
+            let items = document.getElementById("chatArea").querySelectorAll('p');
+            let count = items.length
+
+            if (count > 1) {
+                let item = items[count - 1];
+
+                item.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            var UserName = "";
+            if (!UserName) {
+                UserName = prompt("Please enter your name");
+                document.getElementById("txtUserName").value = UserName;
+            }
+        });
+
+
+        function AttachUserText() {
+            let UserSaid = document.getElementById("txtUserMessage").value;
+            let BotSaidText = `<p class="text-right user-message">${UserSaid} </p>`
+            document.getElementById("chatArea").innerHTML += BotSaidText;
+
+            $.post("/Home/AskBot", { Name: document.getElementById("txtUserName").value, Message: UserSaid }, function ({ botSaid }) {
+                let BotSaidText = `<p class="text-left bot-message">Bot Said : ${botSaid} </p>`;
+                document.getElementById("chatArea").innerHTML += BotSaidText;
+                $('#txtUserMessage').val('').focus();
+                scrollToLastItem();
+            });
+        }
+    </script>
+}
